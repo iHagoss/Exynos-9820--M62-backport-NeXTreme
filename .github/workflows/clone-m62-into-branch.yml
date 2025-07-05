@@ -1,9 +1,9 @@
 name: Clone M62-backport into branch
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '0 3 * * *'  # Runs daily at 3 AM UTC
+  workflow_dispatch:
 
 jobs:
   clone-and-commit:
@@ -12,30 +12,26 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout your repo's target branch
+      - name: Checkout m62-backport branch
         uses: actions/checkout@v4
         with:
           ref: m62-backport
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Remove existing files (optional)
+      - name: Remove existing files (except .git and workflows)
         run: |
           shopt -s extglob
           rm -rf !(.git|.github)
 
-      - name: Clone upstream repo into temp folder
+      - name: Clone upstream repo into branch
         run: |
-          git clone https://github.com/ExtremeXT/M62-backport.git upstream-temp
-
-      - name: Copy contents into current branch
-        run: |
-          cp -r upstream-temp/* .
-          rm -rf upstream-temp
+          git clone https://github.com/ExtremeXT/M62-backport.git
 
       - name: Commit and push changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config "iHagoss@github-actions"
+          git config "iHagoss@github.com"
           git add .
-          git commit -m "Auto-cloned ExtremeXT/M62-backport into m62-backport branch" || echo "No changes to commit"
+          git commit -m "Daily sync: Clone of ExtremeXT/M62-backport"
           git push origin m62-backport
+        continue-on-error: true
